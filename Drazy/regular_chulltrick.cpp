@@ -56,9 +56,6 @@ ld get_min(ld x) {
 	return nd.p*x + nd.q;
 }
 
-const int MAXN = 100010;
-int a[MAXN], b[MAXN];
-
 int main() {
 	return 0;
 }

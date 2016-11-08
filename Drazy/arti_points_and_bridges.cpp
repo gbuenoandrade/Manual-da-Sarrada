@@ -30,7 +30,7 @@ int d[MAXN], low[MAXN], visi[MAXN], t;
 bool art[MAXN];
 set<pii> bs;
 
-void dfs(int u, int p) {
+void dfs(int u, int p=-1) {
 	visi[u] = true;
 	d[u] = low[u] = t++;
 	bool found = false;
