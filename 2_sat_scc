@@ -1,0 +1,151 @@
+/* Solucao do problema http://br.spoj.com/problems/CARDAPIO/ (CARDAPIO - Cardápio da Sra Montagny)
+	- a entrada é dada por strings em que ! (exclamacao) indica negacao de uma variavel
+	- caso queria impor que a variavel X seja true adicione a clausula (X v X)
+	- caso queira import que a variavel X seja false adicione a clausula (!X v !X)
+	- Para uma variavel de vertice X, sua negacao eh dada por X ^ 1 (X xor 1) 
+	- Se quiser uma solucao, percorra o grafo na ordem topologica reversa, caso essa componente nao esteja marcada,
+		marque-a como true e marque a componente da variavel de sua negacao como false */
+
+#include <stdio.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+#include <algorithm>
+#include <stack>
+#define pb push_back
+using namespace std;
+ 
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+ 
+vector <int> g[4015];
+map <string, int> mapa;
+int node;
+ 
+int low_link[4015];
+int index[4015];
+int color[4015];
+int comp[4015]; // indice da componente
+int ncomp; // numero de componentes
+int idx;
+ 
+stack <int> pilha;
+ 
+// algoritmo de tarjan para componente fortemente conexas
+// o retorno das componentes eh dado em ordem topologica reversa
+void strong_connect(int node) {
+    int i;
+    int viz;
+    int w;
+ 
+    index[node] = idx;
+    low_link[node] = idx;
+    color[node] = GRAY;
+	idx++;
+    pilha.push(node);
+ 
+    for (i = 0; i < (int)g[node].size(); i++) {
+        viz = g[node][i];
+ 
+        if (color[viz] == WHITE) {
+            strong_connect(viz);
+            low_link[node] = min(low_link[node], low_link[viz]);
+        } else if (color[viz] == GRAY) {
+            low_link[node] = min(low_link[node], index[viz]);
+        }
+    }
+ 
+	if (index[node] == low_link[node]) {
+		ncomp++;
+		do {
+			w = pilha.top();
+			pilha.pop();
+			color[w] = BLACK;
+			comp[w] = ncomp;
+		} while (w != node);
+	}
+	return;
+}
+ 
+void addv(string s) {
+    if (mapa[s] == 0) {
+        mapa[s] = node++;
+        if (s[0] == '!') {
+            mapa[s.substr(1)] = node++;
+        } else {
+            mapa["!" + s] = node++;
+        }
+    }
+    return;
+}
+ 
+void add_edge(string a, string b) {
+    int u, v;
+ 
+    u = mapa[a] ^ 1;
+    v = mapa[b];
+    g[u].pb(v);
+ 
+    u = mapa[a];
+    v = mapa[b] ^ 1;
+    g[v].pb(u);
+ 
+    return;
+}
+
+int main(void) {
+    int n;
+    int caso;
+ 
+    int i;
+    int sim;
+    string a, b;
+ 
+    caso = 0;
+    while(scanf(" %d", &n) != EOF) {
+        caso++;
+        mapa.clear();
+        node = 2;
+ 
+        for (i = 0; i <= 4005; i++) {
+            g[i].clear();
+			color[i] = WHITE;
+        }
+ 
+		// adicionar arestas
+        for (i = 0; i < n; i++) {
+            cin >> a >> b;
+            addv(a);
+            addv(b);
+            add_edge(a, b);
+        }
+ 
+        for (i = 2; i < node; i++) {
+            if (color[i] == WHITE) {
+                strong_connect(i);
+            }
+        }
+ 
+        sim = 1;
+        pilha = stack<int>();
+		idx = 0;
+		ncomp = 0;
+        for (i = 2; i < node; i++) {
+			// se uma aresta e sua negacao pertencem à mesma componente eh impossivel
+            if (comp[i] == comp[i ^ 1]) {
+                sim = 0;
+                break;
+            }
+        }
+ 
+        printf("Instancia %d\n", caso);
+        if (sim) {
+            printf("sim\n\n");
+        } else {
+            printf("nao\n\n");
+        }
+    }
+    return 0;
+} 
