@@ -1,0 +1,146 @@
+/* automato de sufixos com varias aplicacoes
+	a implementacao abaixo supoe apenas variaveis minusculas inglesas, para modificar
+	mude a struct state e os locais onde ha a subtracao "-a" 
+	- construcao do automato O(N) tempo (ou O(NlogN) se usar set na struct state)
+	- codigo da main (e solve, k_lex) acha a k-esima substring considerando apenas subsintrgs distintas	
+			testado no problema http://www.spoj.com/problems/SUBLEX/
+*/
+
+#include <stdio.h>
+#include <iostream>
+#include <string.h>
+#include <string>
+#define lli long long int
+#define MAXN 100000
+ 
+using namespace std;
+ 
+struct state {
+    int len, link;
+    int next[26]; // mudar para set <int> caso queira nao apenas variaveis minusculas inglesas */
+};
+ 
+state st[MAXN + MAXN];
+lli dp[MAXN + MAXN];
+int sz, last;
+char s[MAXN];
+string r;
+ 
+
+
+void sa_init() {
+    sz = last = 0;
+    st[0].len = 0;
+    st[0].link = -1;
+    sz++;
+ 
+    for (int i = 0; i < MAXN + MAXN; i++) {
+        for (int j = 0; j < 26; j++) {
+            st[i].next[j] = -1;
+        }
+    }
+    return;
+}
+ 
+void sa_extend(char c) {
+    int idx = c - 'a'; // para letras minusculas apenas
+    int cur = sz++;
+    st[cur].len = st[last].len + 1;
+ 
+    int p;
+    for (p = last; p != -1 && st[p].next[idx] == -1; p = st[p].link) {
+        st[p].next[idx] = cur;
+    }
+    if (p == -1) {
+        st[cur].link = 0;
+    } else {
+        int q = st[p].next[idx];
+        if (st[p].len + 1 == st[q].len) {
+            st[cur].link = q;
+        } else {
+            int clone = sz++;
+            st[clone].len = st[p].len + 1;
+            for (int j = 0; j < 26; j++) {
+                st[clone].next[j] = st[q].next[j];
+            }
+            st[clone].link = st[q].link;
+ 
+            for (; p != -1 && st[p].next[idx] == q; p = st[p].link) {
+                st[p].next[idx] = clone;
+            }
+            st[q].link = st[cur].link = clone;
+        }
+    }
+    last = cur;
+}
+
+ 
+
+// Acha a k-esima menor substring da string s (global) (nao conta strings iguais duas vezes ou mais)
+int solve(int pos) {
+    int aux = 1;
+ 
+    if (dp[pos] != -1) {
+        return dp[pos];
+    }
+ 
+    for (int i = 0; i < 26; i++) {
+        if (st[pos].next[i] != -1) {
+            aux += solve(st[pos].next[i]);
+        }
+    }
+    dp[pos] = aux;
+    return aux;
+}
+ 
+
+
+void k_lex(int pos, int k) {
+    int aux = 0;
+    int sum = 0;
+    int next = 0;
+ 
+    //printf("pos = %d, k = %d, dp[pos] = %d\n", pos, k, dp[pos]);
+ 
+    if (k == 0) {
+        return;
+    }
+ 
+    for (int i = 0; i < 26; i++) {
+        if (st[pos].next[i] != -1) {
+            if (k > aux) {
+                sum = aux;
+                aux += dp[st[pos].next[i]];
+                next = i;
+                //printf("i = %d, sum = %d, aux = %d\n", i, sum, aux);
+            }
+        }
+    }
+    //printf("next = %d, sum = %d\n", next, sum);
+ 
+    r += next + 'a';
+    k_lex(st[pos].next[next], k - sum - 1);
+    return;
+}
+ 
+int main(void) {
+    int q;
+    int k;
+ 
+    scanf(" %s", s);
+    sa_init();
+    for (int i = 0; s[i] != '\0'; i++) {
+        sa_extend(s[i]);
+    }
+    memset(dp, -1, sizeof(dp));
+    solve(0);
+ 
+    scanf(" %d", &q);
+    while(q--) {
+        scanf(" %d", &k);
+        r = "";
+        k_lex(0, k);
+        cout << r << endl;
+    }
+    return 0;
+}
