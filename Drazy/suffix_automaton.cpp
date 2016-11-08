@@ -33,7 +33,7 @@ vi length;          			// length[i] : the length of the longest string in the it
 int last;                    	// the index of the equivalence class of the whole string	
 unordered_set<int> terminals;
 
-void build (string s) {
+void build(string s) {
 	// add the initial node
 	edges.push_back(map<char,int>());
 	link.push_back(-1);
@@ -58,19 +58,19 @@ void build (string s) {
 				link[r] = q;
 			}
 			else {
-				  // we have to split, add q'
-				  edges.push_back(edges[q]); // copy edges of q
-				  length.push_back(length[p] + 1);
-				  link.push_back(link[q]); // copy parent of q
-				  int qq = edges.size()-1;
-				  // add qq as the new parent of q and r
-				  link[q] = qq;
-				  link[r] = qq;
-				  // move short classes pointing to q to point to q'
-				  while(p >= 0 && edges[p][s[i]] == q) {
+				// we have to split, add q'
+				edges.push_back(edges[q]); // copy edges of q
+				length.push_back(length[p] + 1);
+				link.push_back(link[q]); // copy parent of q
+				int qq = edges.size()-1;
+				// add qq as the new parent of q and r
+				link[q] = qq;
+				link[r] = qq;
+				// move short classes pointing to q to point to q'
+				while(p >= 0 && edges[p][s[i]] == q) {
 					edges[p][s[i]] = qq;
 					p = link[p];
-				  }
+				}
 			}
 		}
 		last = r;
