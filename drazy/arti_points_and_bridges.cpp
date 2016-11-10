@@ -50,6 +50,7 @@ void dfs(int u, int p=-1) {
 	art[u] = (u ? found : ct>1);
 }
 
+//call with FOR0(i,n) if (!visi[i]) dfs(i);
 
 int main() {
 	NSYNC;
