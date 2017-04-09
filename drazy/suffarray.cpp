@@ -25,7 +25,7 @@ typedef pair<int_type, int_type> pii;
 typedef vector<int_type> vi;
 
 const int MAXN = 200010;
-const int LOGMAXN = 20;
+const int LOGMAXN = 20; // > floor(log(MAXN))
 int p[LOGMAXN][MAXN];
 int sa[MAXN];
 int step;
@@ -55,8 +55,9 @@ void calcsa() {
 		sa[p[step][i]] = i;
 	}	
 }
+//sa[i] = index of the i-th suffix
 
-int lcp(int x, int y) {
+int lcp(int x, int y) {	//x,y are idx of suffix
 	int n = s.size();
 	if(x==y) return n-x;
 	int ans = 0;
